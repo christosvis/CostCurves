@@ -9,35 +9,8 @@ dim(df)
 head(df)
 summary(df)
 
-
-# order ad set by country
-df <- df[order(df$Ad.Set.Name),]
-
-# drop rows for other countries
-
-df=df[!grepl("au",df$Ad.Set.Name),]
-df=df[!grepl("AU",df$Ad.Set.Name),]
-df=df[!grepl("eu",df$Ad.Set.Name),]
-df=df[!grepl("EU",df$Ad.Set.Name),]
-df=df[!grepl("row",df$Ad.Set.Name),]
-df=df[!grepl("ROW",df$Ad.Set.Name),]
-df=df[!grepl("se",df$Ad.Set.Name),]
-df=df[!grepl("SE",df$Ad.Set.Name),]
-df=df[!grepl("uk",df$Ad.Set.Name),]
-df=df[!grepl("UK",df$Ad.Set.Name),]
-
-dim(df)
-
-
-# drop columns
-df <- df[ -c(1, 4, 6:9) ]
-
-head(df)
-dim(df)
-
 # change column names
 colnames(df) <- c("AdName", "Spend", "Purchases")
-
 
 # Create calculated column CPA
 df$CPA <- df$Spend/df$Purchases
@@ -61,20 +34,10 @@ df$CumulativePurchases <- ave(df$Purchases, FUN=cumsum)
 # Cumulative CPA
 df$CumulativeCPA <- df$CumulativeSpend/df$CumulativePurchases
 
-# Marginal CPA
-# df <- df %>% mutate("prev_cumPurchases" = 
-#                      CumulativePurchases - lag(CumulativePurchases))
-
-# df <- df %>% mutate("prev_cumSpend" = 
-#                    CumulativeSpend - lag(CumulativeSpend))
-
 df <- df %>% mutate("MarginalCPA" = 
                       (CumulativeSpend - lag(CumulativeSpend)) /
                       (CumulativePurchases - lag(CumulativePurchases))
                     )
-
-# plot Spend and Purchase
-# plot(df$CumulativeSpend,df$CumulativePurchases)
 
 # plotly plot Spend and Purchases
 fig1 <- plot_ly(data = df, x = ~CumulativeSpend, 
@@ -82,8 +45,6 @@ fig1 <- plot_ly(data = df, x = ~CumulativeSpend,
 
 fig1
 
-# 
-#fig <- plot_ly(data = df, x = ~CumulativeSpend, y = ~CumulativeCPA, type = 'scatter', mode = 'lines')
 
 # polynomial model Spend - Purchases. Important: Raw = TRUE
 model <- lm(df$CumulativePurchases ~ poly(df$CumulativeSpend,2, raw=TRUE))
@@ -104,9 +65,6 @@ coefficient2
 # Prediction
 # change x value. This is your spend
 x <- 150000
-x<- readline(prompt="Enter your spend: ")
-x <- as.integer(x)
-
 y <- intercept + coefficient1*x + coefficient2*x^2
 # this is your predicted Conversions
 y
